@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exam Countdown & Study Planner</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2>Exam Countdown & Study Planner</h2>
+
+<form id="examForm">
+  <label>Exam Name</label>
+  <input type="text" id="examName" placeholder="Enter the Exam name" required>
+
+  <label>Exam Date</label>
+  <input type="date" id="examDate" required>
+
+  <label>Study Topics (comma separated)</label>
+  <input type="text" id="studyTopics" placeholder="Enter the study topics" required>
+
+  <label>Sub Topics (comma separated)</label>
+  <input type="text" id="subTopics" placeholder="Enter the Sub topics" required>
+
+  <label>Study Time Per Topic</label>
+  <input type="number" id="topicHours" placeholder="Hours" min="0" required>
+  <input type="number" id="topicMinutes" placeholder="Minutes" min="0" required>
+
+  <label>Study Time Per Sub Topic</label>
+  <input type="number" id="subTopicHours" placeholder="Hours" min="0" required>
+  <input type="number" id="subTopicMinutes" placeholder="Minutes" min="0" required>
+
+  <button type="submit">Add Exam</button>
+</form>
+
+<br>
+<button id="showPlans">Show Previous Plans</button>
+
+<h3>Saved Plans</h3>
+<div id="plansContainer"></div>
+
+<h3>Flowchart</h3>
+<div id="flowchartContainer"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
