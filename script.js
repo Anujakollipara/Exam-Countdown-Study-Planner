@@ -1,8 +1,8 @@
 let plans = JSON.parse(localStorage.getItem('studyPlans')) || [];
 
-
 document.getElementById('examForm').addEventListener('submit', function(e){
   e.preventDefault();
+
   const plan = {
     examName: document.getElementById('examName').value,
     examDate: document.getElementById('examDate').value,
@@ -15,17 +15,10 @@ document.getElementById('examForm').addEventListener('submit', function(e){
   };
 
   plans.push(plan); 
-  localStorage.setItem('studyPlans', JSON.stringify(plans)); 
+  localStorage.setItem('studyPlans', JSON.stringify(plans));
 
   document.getElementById('plansContainer').innerHTML = '';
-
-
-  if(plans.length > 1){
-    for(let i = 0; i < plans.length-1; i++){
-      showPlanWithButton(plans[i], i);
-    }
-  }
-
+  
   showPlanWithFlow(plan, plans.length - 1);
 
   this.reset();
@@ -38,30 +31,12 @@ function daysLeft(examDate) {
   return diff;
 }
 
-function showPlanWithButton(plan, index){
-  const container = document.getElementById('plansContainer');
-  const days = daysLeft(plan.examDate);
-
-  const div = document.createElement('div');
-  div.className = 'plan';
-  div.innerHTML = `
-    <strong>${plan.examName}</strong> - ${plan.examDate} 
-    <span style="color:green">(in ${days} days)</span><br><br>
-    <b>Study Topics:</b> ${plan.studyTopics.join(', ')} <br>
-    <b>Sub Topics:</b> ${plan.subTopics.join(', ')} <br>
-    <b>Study Time:</b> ${plan.topicHours}h ${plan.topicMinutes}m per topic <br>
-    <b>Study Time:</b> ${plan.subTopicHours}h ${plan.subTopicMinutes}m per sub-topic <br><br>
-    <button onclick="showFlowchart(${index})">Show Flowchart</button>
-    <button onclick="deletePlan(${index})" style="background:red">Delete</button>
-  `;
-  container.appendChild(div);
-}
-
 function showPlanWithFlow(plan, index){
   const container = document.getElementById('plansContainer');
   const flowContainer = document.getElementById('flowchartContainer');
 
   const days = daysLeft(plan.examDate);
+
   const div = document.createElement('div');
   div.className = 'plan';
   div.innerHTML = `
@@ -102,7 +77,45 @@ function showPlanWithFlow(plan, index){
   });
 }
 
-function showFlowchart(index) {
+
+function showPreviousPlans(){
+  const container = document.getElementById('plansContainer');
+  container.innerHTML = ''; // clear container
+  const flowContainer = document.getElementById('flowchartContainer');
+  flowContainer.innerHTML = ''; 
+
+  if(plans.length === 0){
+    container.innerHTML = '<p>No plans saved.</p>';
+    return;
+  }
+
+
+  for(let i = 0; i < plans.length - 1; i++){
+    showPlanWithButton(plans[i], i);
+  }
+}
+
+function showPlanWithButton(plan, index){
+  const container = document.getElementById('plansContainer');
+  const days = daysLeft(plan.examDate);
+
+  const div = document.createElement('div');
+  div.className = 'plan';
+  div.innerHTML = `
+    <strong>${plan.examName}</strong> - ${plan.examDate} 
+    <span style="color:green">(in ${days} days)</span><br><br>
+    <b>Study Topics:</b> ${plan.studyTopics.join(', ')} <br>
+    <b>Sub Topics:</b> ${plan.subTopics.join(', ')} <br>
+    <b>Study Time:</b> ${plan.topicHours}h ${plan.topicMinutes}m per topic <br>
+    <b>Study Time:</b> ${plan.subTopicHours}h ${plan.subTopicMinutes}m per sub-topic <br><br>
+    <button onclick="showFlowchart(${index})">Show Flowchart</button>
+    <button onclick="deletePlan(${index})" style="background:red">Delete</button>
+  `;
+  container.appendChild(div);
+}
+
+
+function showFlowchart(index){
   const flowContainer = document.getElementById('flowchartContainer');
   flowContainer.innerHTML = '';
 
@@ -133,22 +146,17 @@ function showFlowchart(index) {
   });
 }
 
-function deletePlan(index) {
+function deletePlan(index){
   plans.splice(index,1);
   localStorage.setItem('studyPlans', JSON.stringify(plans));
   document.getElementById('plansContainer').innerHTML = '';
   document.getElementById('flowchartContainer').innerHTML = '';
-  // Refresh all plans
-  for(let i=0;i<plans.length;i++){
-    showPlanWithButton(plans[i], i);
+
+
+  if(plans.length > 0){
+    showPlanWithFlow(plans[plans.length-1], plans.length-1);
   }
 }
 
-document.getElementById('showPlans').addEventListener('click', function(){
-  document.getElementById('plansContainer').innerHTML = '';
-  const flowContainer = document.getElementById('flowchartContainer');
-  flowContainer.innerHTML = '';
-  for(let i=0;i<plans.length;i++){
-    showPlanWithButton(plans[i], i);
-  }
-});
+// Show previous plans button
+document.getElementById('showPlans').addEventListener('click', showPreviousPlans);
