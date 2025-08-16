@@ -17,78 +17,138 @@ document.getElementById('examForm').addEventListener('submit', function(e){
   plans.push(plan); 
   localStorage.setItem('studyPlans', JSON.stringify(plans)); 
 
-  showNewPlan(plan, plans.length - 1);
+  document.getElementById('plansContainer').innerHTML = '';
+
+
+  if(plans.length > 1){
+    for(let i = 0; i < plans.length-1; i++){
+      showPlanWithButton(plans[i], i);
+    }
+  }
+
+  showPlanWithFlow(plan, plans.length - 1);
 
   this.reset();
 });
 
+function daysLeft(examDate) {
+  const today = new Date();
+  const exam = new Date(examDate);
+  const diff = Math.ceil((exam - today) / (1000 * 60 * 60 * 24));
+  return diff;
+}
 
-function showNewPlan(plan, index) {
+function showPlanWithButton(plan, index){
   const container = document.getElementById('plansContainer');
-  const flow = document.getElementById('flowchartContainer');
-
-  container.innerHTML = ''; // clear previous display
-  flow.innerHTML = '';
+  const days = daysLeft(plan.examDate);
 
   const div = document.createElement('div');
   div.className = 'plan';
   div.innerHTML = `
-    <strong>${plan.examName}</strong> (${plan.examDate}) 
-    <button onclick="deletePlan(${index})">Delete</button>
-    <button onclick="showFlowchart(${index})">Flowchart</button>
+    <strong>${plan.examName}</strong> - ${plan.examDate} 
+    <span style="color:green">(in ${days} days)</span><br><br>
+    <b>Study Topics:</b> ${plan.studyTopics.join(', ')} <br>
+    <b>Sub Topics:</b> ${plan.subTopics.join(', ')} <br>
+    <b>Study Time:</b> ${plan.topicHours}h ${plan.topicMinutes}m per topic <br>
+    <b>Study Time:</b> ${plan.subTopicHours}h ${plan.subTopicMinutes}m per sub-topic <br><br>
+    <button onclick="showFlowchart(${index})">Show Flowchart</button>
+    <button onclick="deletePlan(${index})" style="background:red">Delete</button>
   `;
   container.appendChild(div);
 }
 
-document.getElementById('showPlans').addEventListener('click', function(){
+function showPlanWithFlow(plan, index){
   const container = document.getElementById('plansContainer');
-  container.innerHTML = ''; // clear current display
+  const flowContainer = document.getElementById('flowchartContainer');
 
-  if(plans.length === 0) { container.innerHTML = '<p>No plans saved.</p>'; return; }
+  const days = daysLeft(plan.examDate);
+  const div = document.createElement('div');
+  div.className = 'plan';
+  div.innerHTML = `
+    <strong>${plan.examName}</strong> - ${plan.examDate} 
+    <span style="color:green">(in ${days} days)</span><br><br>
+    <b>Study Topics:</b> ${plan.studyTopics.join(', ')} <br>
+    <b>Sub Topics:</b> ${plan.subTopics.join(', ')} <br>
+    <b>Study Time:</b> ${plan.topicHours}h ${plan.topicMinutes}m per topic <br>
+    <b>Study Time:</b> ${plan.subTopicHours}h ${plan.subTopicMinutes}m per sub-topic <br><br>
+    <button onclick="deletePlan(${index})" style="background:red">Delete</button>
+  `;
+  container.appendChild(div);
 
-  plans.forEach((p,i) => {
-    const div = document.createElement('div');
-    div.className = 'plan';
-    div.innerHTML = `
-      <strong>${p.examName}</strong> (${p.examDate}) 
-      <button onclick="deletePlan(${i})">Delete</button>
-      <button onclick="showFlowchart(${i})">Flowchart</button>
-    `;
-    container.appendChild(div);
+  flowContainer.innerHTML = '';
+  const flowDiv = document.createElement('div');
+  flowDiv.className = 'flowchart-plan';
+  flowContainer.appendChild(flowDiv);
+
+  const examNode = document.createElement('div');
+  examNode.className = 'flow-node';
+  examNode.textContent = `Exam: ${plan.examName} (${plan.examDate})`;
+  flowDiv.appendChild(examNode);
+
+  plan.studyTopics.forEach(topic => {
+    const topicNode = document.createElement('div');
+    topicNode.className = 'flow-node';
+    topicNode.style.marginLeft = '30px';
+    topicNode.textContent = `Topic: ${topic} (${plan.topicHours}h ${plan.topicMinutes}m)`;
+    flowDiv.appendChild(topicNode);
+
+    plan.subTopics.forEach(sub => {
+      const subNode = document.createElement('div');
+      subNode.className = 'flow-node';
+      subNode.style.marginLeft = '60px';
+      subNode.textContent = `Subtopic: ${sub} (${plan.subTopicHours}h ${plan.subTopicMinutes}m)`;
+      flowDiv.appendChild(subNode);
+    });
   });
-});
+}
 
+function showFlowchart(index) {
+  const flowContainer = document.getElementById('flowchartContainer');
+  flowContainer.innerHTML = '';
+
+  const plan = plans[index];
+  const flowDiv = document.createElement('div');
+  flowDiv.className = 'flowchart-plan';
+  flowContainer.appendChild(flowDiv);
+
+  const examNode = document.createElement('div');
+  examNode.className = 'flow-node';
+  examNode.textContent = `Exam: ${plan.examName} (${plan.examDate})`;
+  flowDiv.appendChild(examNode);
+
+  plan.studyTopics.forEach(topic => {
+    const topicNode = document.createElement('div');
+    topicNode.className = 'flow-node';
+    topicNode.style.marginLeft = '30px';
+    topicNode.textContent = `Topic: ${topic} (${plan.topicHours}h ${plan.topicMinutes}m)`;
+    flowDiv.appendChild(topicNode);
+
+    plan.subTopics.forEach(sub => {
+      const subNode = document.createElement('div');
+      subNode.className = 'flow-node';
+      subNode.style.marginLeft = '60px';
+      subNode.textContent = `Subtopic: ${sub} (${plan.subTopicHours}h ${plan.subTopicMinutes}m)`;
+      flowDiv.appendChild(subNode);
+    });
+  });
+}
 
 function deletePlan(index) {
   plans.splice(index,1);
   localStorage.setItem('studyPlans', JSON.stringify(plans));
   document.getElementById('plansContainer').innerHTML = '';
   document.getElementById('flowchartContainer').innerHTML = '';
+  // Refresh all plans
+  for(let i=0;i<plans.length;i++){
+    showPlanWithButton(plans[i], i);
+  }
 }
 
-function showFlowchart(index) {
-  const flow = document.getElementById('flowchartContainer');
-  flow.innerHTML = '';
-  const p = plans[index];
-
-  const examNode = document.createElement('div');
-  examNode.className = 'flow-node';
-  examNode.textContent = `Exam: ${p.examName} (${p.examDate})`;
-  flow.appendChild(examNode);
-
-  p.studyTopics.forEach(topic => {
-    const topicNode = document.createElement('div');
-    topicNode.className = 'flow-node';
-    topicNode.style.marginLeft = '30px';
-    topicNode.textContent = `Topic: ${topic} (${p.topicHours}h ${p.topicMinutes}m)`;
-    flow.appendChild(topicNode);
-
-    p.subTopics.forEach(sub => {
-      const subNode = document.createElement('div');
-      subNode.className = 'flow-node';
-      subNode.style.marginLeft = '60px';
-      subNode.textContent = `Subtopic: ${sub} (${p.subTopicHours}h ${p.subTopicMinutes}m)`;
-      flow.appendChild(subNode);
-    });
-  });
-}
+document.getElementById('showPlans').addEventListener('click', function(){
+  document.getElementById('plansContainer').innerHTML = '';
+  const flowContainer = document.getElementById('flowchartContainer');
+  flowContainer.innerHTML = '';
+  for(let i=0;i<plans.length;i++){
+    showPlanWithButton(plans[i], i);
+  }
+});
